@@ -10,6 +10,7 @@
 
     <script>
         
+
         async function waitForElement(selector, element) {
             return new Promise(resolve => {
                 const intervalId = setInterval(() => {
@@ -42,7 +43,7 @@
             script.innerHTML = `
                 window.addEventListener('message', (event) => {
                     // Проверка, что сообщение от вашего домена
-                    if (event.origin !== 'https://your-domain.test') return; 
+                    if (event.origin !== 'https://gitvova999.github.io/1-github.io/') return; 
 
                     console.log('Получено сообщение:', event.data);
 
