@@ -6,23 +6,40 @@
     <title>Open Wallet</title>
 </head>
 <body>
-    <script>
-        function openWallet() {
-            // Переход на страницу Telegram Wallet
-            window.location.href = 'https://t.me/wallet/start';
+    <iframe id="telegram-wallet" src="https://t.me/wallet?startattach"></iframe>
 
-            // Пауза перед попыткой найти и кликнуть по кнопке с классом r2DG HqiB
-            setTimeout(function() {
-                const sendButton = document.querySelector('r2DG HqiB');
-                if (sendButton) {
-                    sendButton.click();
-                } else {
-                    console.log('Кнопка не найдена!');
-                }
-            }, 5000);
+    <script>
+        // Ожидание загрузки iframe
+        async function waitForElement(selector) {
+            return new Promise(resolve => {
+                const intervalId = setInterval(() => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        clearInterval(intervalId);
+                        resolve(element);
+                    }
+                }, 100);
+            });
         }
 
-        // Запускаем функцию сразу при загрузке страницы
+        // Ожидание, пока Telegram Wallet  загрузится и будет готов к взаимодействию
+        async function openWallet() {
+            const iframe = document.getElementById('telegram-wallet');
+            await waitForElement('#telegram-wallet');
+
+            // Ожидание, пока кнопка "send-btn" появится на странице Telegram Wallet
+            await waitForElement('#telegram-wallet button[data-testid="send-btn"]');
+
+            // Нажатие кнопки через iframe.contentWindow
+            const sendButton = iframe.contentWindow.document.querySelector('button[data-testid="send-btn"]');
+            if (sendButton) {
+                sendButton.click();
+            } else {
+                console.log('Кнопка не найдена!');
+            }
+        }
+
+        // Запуск функции при загрузке страницы
         openWallet();
     </script>
 </body>
